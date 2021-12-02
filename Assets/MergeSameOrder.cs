@@ -11,10 +11,12 @@ using NPOI.XSSF.UserModel;
 using UnityEngine.UI;
 using NaughtyAttributes;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class MergeSameOrder : MonoBehaviour {
     public Text m_text;
     public Text debugText;
+    public Text splitText;
     
     private Dictionary<string, string> m_table = new Dictionary<string, string>();
     private DataTable dataTable = new DataTable();
@@ -32,6 +34,7 @@ public class MergeSameOrder : MonoBehaviour {
     public void MatchSameOrderId()
     {
         print(dataTable.Rows.Count);
+        m_table.Clear();
         for (int i = 0; i < dataTable.Rows.Count; i++)
         {
             if (!m_table.ContainsKey(dataTable.Rows[i].ItemArray[0].ToString()))
@@ -40,11 +43,14 @@ public class MergeSameOrder : MonoBehaviour {
             }
             else {
                 string _key = dataTable.Rows[i].ItemArray[0].ToString();
-                m_table[_key] = m_table[_key] +"|" +dataTable.Rows[i].ItemArray[1].ToString();//Add(dataTable.Rows[i].ItemArray[0].ToString(), dataTable.Rows[i].ItemArray[1].ToString());
+                m_table[_key] = m_table[_key] + splitText.text + dataTable.Rows[i].ItemArray[1].ToString();//Add(dataTable.Rows[i].ItemArray[0].ToString(), dataTable.Rows[i].ItemArray[1].ToString());
             }
         }
         WriteExcel();
-        
+    }
+    public void ReloadTool()
+    {
+        SceneManager.LoadScene(0);
     }
 
 
@@ -64,7 +70,12 @@ public class MergeSameOrder : MonoBehaviour {
 
         IRow row;//行类
         ICell cell;//单元格类        
-
+        ICellStyle style = hssfw.CreateCellStyle();
+        style.BorderBottom = BorderStyle.Thin;
+        style.BorderLeft = BorderStyle.Thin;
+        style.BorderRight = BorderStyle.Thin;
+        style.BorderTop = BorderStyle.Thin;
+        style.Alignment = HorizontalAlignment.Left;
         for (int i = 0; i <= m_table.Count; i++)//用第一行来取标题，所以《=最大长度
         {
             row = sheet.CreateRow(i);
@@ -72,12 +83,7 @@ public class MergeSameOrder : MonoBehaviour {
             {
                 cell = row.CreateCell(j);
                 //设置表格的样式
-                ICellStyle style = hssfw.CreateCellStyle();
-                style.BorderBottom = BorderStyle.Thin;
-                style.BorderLeft = BorderStyle.Thin;
-                style.BorderRight = BorderStyle.Thin;
-                style.BorderTop = BorderStyle.Thin;
-                style.Alignment = HorizontalAlignment.Left;
+                
                 cell.CellStyle = style;
 
                 if (i == 0)//第一行取标题
@@ -116,7 +122,7 @@ public class MergeSameOrder : MonoBehaviour {
             print("streamingAssets创建成功");
         }
 
-        FileStream fs = new FileStream(Application.dataPath + "/StreamingAssets/OutPut.xlsx", FileMode.OpenOrCreate);
+        FileStream fs = new FileStream(Application.dataPath + "/StreamingAssets/OutPut.xls", FileMode.OpenOrCreate);
         hssfw.Write(fs);
         //byte[] bytes = new byte[fs.Length];
         //fs.Read(bytes,0,bytes.Length);
